@@ -1,0 +1,4 @@
+1. buka phpmyadmin pada komputer yang akan diinstall
+2. buat database baru, selesai dibuat, import database dari file db.sql
+3. edit file database.php yang terdapat di: /application/config/database.php sesuaikan dengan database
+yang dibuat pada langkah 3.
