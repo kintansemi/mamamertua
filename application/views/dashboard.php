@@ -33,7 +33,7 @@
                                                 </div>
                                                 <div class="col-md-6">
                                                     <label>Jumlah Pembelian</label>
-                                                    <input type="text" name="jumlah" class="form-control">
+                                                    <input type="number" name="jumlah" class="form-control">
                                                 </div>
                                             </div>
                                         </div>
@@ -61,8 +61,9 @@
                                       <th>Pesanan</th>
                                       <th>Jumlah</th>
                                       <th>Harga</th>
+                                      <th>Aksi</th>
                                   </tr>
-                                  <?php $i = 1; $total = 0; ?>
+                                  <?php $id_resi=0; $i = 1; $total = 0; ?>
                                   <?php foreach ($list_pesanan as $pesanan): ?>
                                     <?php $menu= $this->Menu_m->get_row(['id_menu'=> $pesanan->id_menu]);?>
                                   <tr>
@@ -70,8 +71,10 @@
                                       <td><?= $menu->nama_menu ?></td>
                                       <td><?= $pesanan->jumlah ?></td>
                                       <td>Rp. <?= $menu->harga ?></td>
+                                      <td><a href ="<?= base_url('panel/deletepesanan/'.$pesanan->id_pesanan)?>">Hapus</a></td>
+                                      
                                   </tr>
-                                  <?php $i++; $total = $total + ($pesanan->jumlah*$menu->harga); ?>
+                                  <?php $id_resi= $pesanan->id_resi; $i++; $total = $total + ($pesanan->jumlah*$menu->harga); ?>
                                 <?php endforeach; ?>
                                   <tr>
                                       <td>Total Pembayaran</td>
@@ -79,7 +82,7 @@
                                       <td></td>
                                       <td>Rp. <?= $total ?></td>
                                   </tr>
-                                  <?php $kembalian; $resi = $this->Resi_m->get_row(['status'=>'belum']);
+                                  <?php $kembalian; $resi = $this->Pesanan_m->get_row(['status'=>'belum']);
                                         if(isset($resi)){
                                             $uang = $resi->uang;
                                         } else {
@@ -173,6 +176,12 @@
                             <label class="col-sm-2 col-sm-2 control-label">Jumlah Uang</label>
                             <div class="col-sm-10">
                                 <input type="number" class="form-control" name="uang">
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="hidden" class="form-control" name="total" value="<?= $total ?>">
+                            </div>
+                            <div class="col-sm-10">
+                                <input type="hidden" class="form-control" name="resi" value="<?= $id_resi ?>">
                             </div>
                         </div>
                       </div><!-- col-lg-12-->       

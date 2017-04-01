@@ -20,54 +20,63 @@
 
         $this->load->model('Menu_m');
         $this->load->model('Login_m');
-        $this->load->model('Penjualan_m');
-        $this->load->model('User_data');
-        $this->load->model('Resi_m');
+        $this->load->model('Detail_pesanan_m');
+        $this->load->model('Pesanan_m');
       }
 
       public function index()
       {
+        $id_resi=0;
+        $pesananprev = $this->Pesanan_m->get_row(['status'=>'belum']);
+            if(isset($pesananprev)){
+              $id_resi = $pesananprev->id_pesanan;
+            }
         date_default_timezone_set("Asia/Jakarta");
-        $id_resi;
-        $resi = $this->Resi_m->get_row(['status'=>'belum']);
-        if(isset($resi)){
-          $id_resi = $resi->no_resi;
-        } else {
-          $id_resi = 0;
-        }
-
         if ($this->POST('submit')) {
           if ($this->POST('jumlah')<= 0 ) {
             $this->flashmsg('<i class=""></i>Tentukan input yang valid', 'warning');
             redirect('panel');
             exit;
           }
-          if($id_resi==0){
-            $data_resi = ['tanggal' => date('Y-m-d')];
-            $this->Resi_m->insert($data_resi);
-            $id_resi = $this->Resi_m->get_row(['status'=>'belum']);
-          }
           $menu = $this->Menu_m->get_row(['id_menu'=>$this->POST('kode')]);
-          $user = $this->User_data->get_row(['username'=>$this->session->userdata('username')]);
           if (isset($menu)) {
+            $pesananprev = $this->Pesanan_m->get_row(['status'=>'belum']);
+            if(isset($pesananprev)){
+              $id_resi = $pesananprev->id_pesanan;
+               $data = ['id_menu' => $menu->id_menu,
+                    'jumlah' => $this->POST('jumlah'),
+                    'id_resi' => $pesananprev->id_pesanan
+                ];
+                $this->Detail_pesanan_m->insert($data);
+            } else{
+               $data_resi = ['tanggal' => date('Y-m-d')];
+            $this->Pesanan_m->insert($data_resi);
+            $data_nota = ['tanggal' => date('Y-m-d'),'id_nota'=> $this->db->insert_id()];
+            $this->load->model('Nota_pembayaran_m');
+            $this->Nota_pembayaran_m->insert($data_nota);
             $data = ['id_menu' => $menu->id_menu,
                     'jumlah' => $this->POST('jumlah'),
-                    'kasir' => $user->nama,
-                    'id_resi' => $id_resi,
+                    'id_resi' => $this->db->insert_id()
             ];
-            $this->Penjualan_m->insert($data);
+            $id_resi = $this->db->insert_id();
+            $this->Detail_pesanan_m->insert($data);
+            }
           } else {
             redirect('panel');
           }
         }
 
         if($this->POST('uangmasuk')){
-          $data = ['uang' => $this->POST('uang')];
-          $this->Resi_m->update($id_resi,$data);
+          $this->load->model('Nota_pembayaran_m');
+          $data = ['total'=> $this->POST('total'), 'uang'=>$this->POST('uang') ];
+          $id_resi = $this->POST('resi');
+          $this->Pesanan_m->update($this->POST('resi'),$data);
+          $data_nota = ['total'=> $this->POST('total')];
+          $this->Nota_pembayaran_m->update($this->POST('resi'),$data_nota);
         }
 
         $this->data['list_menu'] = $this->Menu_m->get();
-        $this->data['list_pesanan'] = $this->Penjualan_m->get(['id_resi'=>$id_resi]);
+        $this->data['list_pesanan'] = $this->Detail_pesanan_m->get(['id_resi'=>$id_resi]);
         $this->data['title'] = '.:: Dashboard ::.';
         $this->data['content'] = 'dashboard';
         $this->template($this->data);
@@ -76,7 +85,7 @@
       public function penjualan()
       {
         date_default_timezone_set("Asia/Jakarta");
-        $this->data['list_penjualan'] = $this->Penjualan_m->get(['tanggal' => date('Y-m-d') ]);
+        $this->data['list_penjualan'] = $this->Detail_pesanan_m->get(['tanggal' => date('Y-m-d') ]);
         $this->data['title'] = '.:: Penjualan ::.';
         $this->data['content'] = 'penjualan';
         $this->template($this->data);
@@ -85,20 +94,20 @@
       public function pembayaran()
       {
         $id_resi;
-        $resi = $this->Resi_m->get_row(['status'=>'belum']);
+        $resi = $this->Pesanan_m->get_row(['status'=>'belum']);
         if(isset($resi)){
-          $id_resi = $resi->no_resi;
+          $id_resi = $resi->id_pesanan;
         } else {
           $id_resi = 0;
         }
 
         date_default_timezone_set("Asia/Jakarta");
-          $list_pesanan=$this->Penjualan_m->get(['status'=>'unconfirmed']);
+          $list_pesanan=$this->Detail_pesanan_m->get(['status'=>'unconfirmed']);
           $data = ['status'=>'confirmed','tanggal'=> date('Y-m-d')];
           foreach ($list_pesanan as $pesanan) {
-            $this->Penjualan_m->update($pesanan->id_penjualan,$data);
+            $this->Detail_pesanan_m->update($pesanan->id_pesanan,$data);
           }
-          $this->Resi_m->update($id_resi,$data);
+          $this->Pesanan_m->update($id_resi,$data);
           $this->flashmsg('<i class=""></i>Transaksi Sukses!', 'success','msg_trans');
         redirect('panel');
       }
@@ -112,31 +121,30 @@
 
       public function cetak_resi(){
         $id_resi;
-        $resi = $this->Resi_m->get_row(['status'=>'belum']);
-        if(isset($resi)){
-          $id_resi = $resi->no_resi;
+        $this->data['resi'] = $this->Pesanan_m->get_row(['status'=>'belum']);
+        if(isset($this->data['resi'])){
+          $id_resi = $this->data['resi']->id_pesanan;
         } else {
           $id_resi = 0;
         }
-        $this->data['id_resi'] = $id_resi;
-        $this->data['list_pesanan'] = $this->data['list_penjualan'] = $this->Penjualan_m->get(['id_resi'=>$id_resi]);
+        $this->data['list_pesanan'] = $this->Detail_pesanan_m->get(['id_resi'=>$id_resi]);
         $this->load->view('resi',$this->data);
       }
 
       public function cancel(){
         $id_resi;
-        $resi = $this->Resi_m->get_row(['status'=>'belum']);
+        $resi = $this->Pesanan_m->get_row(['status'=>'belum']);
         if(isset($resi)){
-          $id_resi = $resi->no_resi;
+          $id_resi = $resi->id_pesanan;
         } else {
           $id_resi = 0;
         }
 
-        $data_resi = ['no_resi'=> $id_resi];
-        $this->Resi_m->delete_by($data_resi);
+        $data_resi = ['id_pesanan'=> $id_resi];
+        $this->Pesanan_m->delete_by($data_resi);
 
         $data_resi = ['id_resi'=> $id_resi];
-        $this->Penjualan_m->delete_by($data_resi);
+        $this->Detail_pesanan_m->delete_by($data_resi);
 
         redirect('panel');
       }
@@ -145,9 +153,9 @@
         date_default_timezone_set("Asia/Jakarta");
         $bulan = $this->uri->segment(3);
         if(isset($bulan))
-          $this->data['list_penjualan'] = $this->Penjualan_m->penjualan_bulan($bulan);
+          $this->data['list_penjualan'] = $this->Detail_pesanan_m->penjualan_bulan($bulan);
         else
-          $this->data['list_penjualan'] = $this->Penjualan_m->get();
+          $this->data['list_penjualan'] = $this->Detail_pesanan_m->get();
           
        
         $this->data['title'] = '.:: Penjualan ::.';
@@ -195,25 +203,16 @@
         redirect('panel/menu');
       }
 
-      // public function edit_user(){
-      //   if($this->data['id_role']!=1){
-      //     echo "kau bukan owner";
-      //   }
+      public function cetakreport(){
+        $this->data['list_penjualan'] = $this->Detail_pesanan_m->get();
+        $this->load->view('report', $this->data);
+      }
 
-      //   if($this->POST('edit')){
-      //     $data_user = ['password'=> $this->POST('password'),
-      //               'username' => $this->POST('username')
-      //     ];
-      //     $this->Login_m->update($this->POST('username'),$data_user);
-      //     // echo $this->POST('password').'<br>';
-      //     // echo $this->POST('username').'<br>';
-      //   }
-      //   $this->data['owner'] = $this->Login_m->get_row(['id_role'=>1]);
-      //   $this->data['kasir'] = $this->Login_m->get_row(['id_role'=>2]);
-      //   $this->data['title'] = '.:: Edit User ::.';
-      //   $this->data['content'] = 'edit_user';
-      //   $this->template($this->data);
-      // }
+      public function deletepesanan(){
+        $id = $this->uri->segment(3);
+        $this->Detail_pesanan_m->delete($id);
+        redirect('panel');
+      }
 
     }
 

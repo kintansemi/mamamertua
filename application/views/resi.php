@@ -1,4 +1,4 @@
-No. Resi: <?= $id_resi ?> <br>
+No. Resi: <?= $resi->id_pesanan ?> <br>
 Pesanan: <br>
 <ol>
     <?php $total=0; foreach($list_pesanan as $pesanan ): ?>
@@ -7,4 +7,4 @@ Pesanan: <br>
     <?php $total = $total + ($pesanan->jumlah*$menu->harga); ?>
     <?php endforeach; ?>
 </ol>
-Total: <?= $total ?>
+Total: <?= $total ?> <br/>

@@ -1,5 +1,4 @@
 <!-- header logo: style can be found in header.less -->
-<!--<?php $data = $this->User_data->get_row(['username'=>$this->session->userdata('username')]) ?>-->
         <header class="header">
             <a href="../../index.html" class="logo">
                 <!-- Add the class icon to your logo image or logo icon to add the margining -->

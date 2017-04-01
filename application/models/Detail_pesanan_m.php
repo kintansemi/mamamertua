@@ -2,14 +2,14 @@
     /**
      *
      */
-    class Penjualan_m extends MY_Model
+    class Detail_pesanan_m extends MY_Model
     {
 
       function __construct()
       {
         parent::__construct();
-        $this->data['primary_key'] = 'id_penjualan';
-        $this->data['table_name'] = 'penjualan';
+        $this->data['primary_key'] = 'id_pesanan';
+        $this->data['table_name'] = 'detail_pesanan';
         date_default_timezone_set("Asia/Jakarta");
       }
       public function ClearPesanan()

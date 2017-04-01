@@ -4,19 +4,6 @@
         <!-- sidebar: style can be found in sidebar.less -->
         <section class="sidebar">
             <!-- Sidebar user panel -->
-            <!--<div class="user-panel">
-                <div class="pull-left image">
-                    <img src="<?= base_url('assets/AdminLTE/img/avatar3.png')?>" class="img-circle" alt="User Image" />
-                </div>
-                <div class="pull-left info">
-                  <?php $data = $this->User_data->get_row(['username'=>$this->session->userdata('username')]) ?>
-                    <p>Hello, <?= $data->nama ?></p>
-
-                    <a href="#"><i class="fa fa-circle text-success"></i> Online</a>
-                </div>
-            </div>-->
-
-<!-- sidebar menu: : style can be found in sidebar.less -->
                     <ul class="sidebar-menu">
                         <li>
                             <a href="<?= base_url()?>">
@@ -31,9 +18,8 @@
                             </a>
                             <ul class="treeview-menu">
                                 <li><a href="<?= base_url('panel/penjualan')?>"><i class="fa fa-angle-double-right"></i> Harian</a></li>
-                                <?php if($this->session->userdata('id_role')== 1):?>
                                 <li><a href="<?= base_url('panel/total_penjualan')?>"><i class="fa fa-angle-double-right"></i> Total Penjualan</a></li>
-                                <?php endif; ?>
+                                <li><a href="<?= base_url('panel/cetakreport')?>"><i class="fa fa-angle-double-right"></i> Cetak Laporan</a></li>
                             </ul>
                         </li>
                         <li class="treeview">
