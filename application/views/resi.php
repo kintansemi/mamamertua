@@ -1,4 +1,4 @@
-No. Resi: <?= $resi->id_pesanan ?> <br>
+No. Nota: <?= $resi->id_pesanan ?> <br>
 Pesanan: <br>
 <ol>
     <?php $total=0; foreach($list_pesanan as $pesanan ): ?>
