@@ -26,10 +26,10 @@
 
       public function index()
       {
-        $id_resi=0;
+        $id_pesanan=0;
         $pesananprev = $this->Pesanan_m->get_row(['status'=>'belum']);
             if(isset($pesananprev)){
-              $id_resi = $pesananprev->id_pesanan;
+              $id_pesanan = $pesananprev->id_pesanan;
             }
         date_default_timezone_set("Asia/Jakarta");
         if ($this->POST('submit')) {
@@ -42,23 +42,23 @@
           if (isset($menu)) {
             $pesananprev = $this->Pesanan_m->get_row(['status'=>'belum']);
             if(isset($pesananprev)){
-              $id_resi = $pesananprev->id_pesanan;
+              $id_pesanan = $pesananprev->id_pesanan;
                $data = ['id_menu' => $menu->id_menu,
                     'jumlah' => $this->POST('jumlah'),
-                    'id_resi' => $pesananprev->id_pesanan
+                    'id_pesanan' => $pesananprev->id_pesanan
                 ];
                 $this->Detail_pesanan_m->insert($data);
             } else{
                $data_resi = ['tanggal' => date('Y-m-d')];
             $this->Pesanan_m->insert($data_resi);
-            $data_nota = ['tanggal' => date('Y-m-d'),'id_nota'=> $this->db->insert_id()];
+            $data_nota = ['tanggal' => date('Y-m-d'),'id_nota'=> $this->db->insert_id(),'id_pesanan'=>$this->db->insert_id()];
             $this->load->model('Nota_pembayaran_m');
             $this->Nota_pembayaran_m->insert($data_nota);
             $data = ['id_menu' => $menu->id_menu,
                     'jumlah' => $this->POST('jumlah'),
-                    'id_resi' => $this->db->insert_id()
+                    'id_pesanan' => $this->db->insert_id()
             ];
-            $id_resi = $this->db->insert_id();
+            $id_pesanan = $this->db->insert_id();
             $this->Detail_pesanan_m->insert($data);
             }
           } else {
@@ -69,14 +69,14 @@
         if($this->POST('uangmasuk')){
           $this->load->model('Nota_pembayaran_m');
           $data = ['total'=> $this->POST('total'), 'uang'=>$this->POST('uang') ];
-          $id_resi = $this->POST('resi');
+          $id_pesanan = $this->POST('resi');
           $this->Pesanan_m->update($this->POST('resi'),$data);
           $data_nota = ['total'=> $this->POST('total')];
           $this->Nota_pembayaran_m->update($this->POST('resi'),$data_nota);
         }
 
         $this->data['list_menu'] = $this->Menu_m->get();
-        $this->data['list_pesanan'] = $this->Detail_pesanan_m->get(['id_resi'=>$id_resi]);
+        $this->data['list_pesanan'] = $this->Detail_pesanan_m->get(['id_pesanan'=>$id_pesanan]);
         $this->data['title'] = '.:: Dashboard ::.';
         $this->data['content'] = 'dashboard';
         $this->template($this->data);
@@ -93,21 +93,21 @@
 
       public function pembayaran()
       {
-        $id_resi;
+        $id_pesanan;
         $resi = $this->Pesanan_m->get_row(['status'=>'belum']);
         if(isset($resi)){
-          $id_resi = $resi->id_pesanan;
+          $id_pesanan = $resi->id_pesanan;
         } else {
-          $id_resi = 0;
+          $id_pesanan = 0;
         }
 
         date_default_timezone_set("Asia/Jakarta");
-          $list_pesanan=$this->Detail_pesanan_m->get(['status'=>'unconfirmed']);
+          $list_pesanan=$this->Detail_pesanan_m->get(['id_pesanan'=>$id_pesanan]);
           $data = ['status'=>'confirmed','tanggal'=> date('Y-m-d')];
           foreach ($list_pesanan as $pesanan) {
-            $this->Detail_pesanan_m->update($pesanan->id_pesanan,$data);
+            $this->Detail_pesanan_m->update($pesanan->id_detailpesanan,$data);
           }
-          $this->Pesanan_m->update($id_resi,$data);
+          $this->Pesanan_m->update($id_pesanan,$data);
           $this->flashmsg('<i class=""></i>Transaksi Sukses!', 'success','msg_trans');
         redirect('panel');
       }
@@ -120,30 +120,30 @@
     	}
 
       public function cetak_resi(){
-        $id_resi;
+        $id_pesanan;
         $this->data['resi'] = $this->Pesanan_m->get_row(['status'=>'belum']);
         if(isset($this->data['resi'])){
-          $id_resi = $this->data['resi']->id_pesanan;
+          $id_pesanan = $this->data['resi']->id_pesanan;
         } else {
-          $id_resi = 0;
+          $id_pesanan = 0;
         }
-        $this->data['list_pesanan'] = $this->Detail_pesanan_m->get(['id_resi'=>$id_resi]);
+        $this->data['list_pesanan'] = $this->Detail_pesanan_m->get(['id_pesanan'=>$id_pesanan]);
         $this->load->view('resi',$this->data);
       }
 
       public function cancel(){
-        $id_resi;
+        $id_pesanan;
         $resi = $this->Pesanan_m->get_row(['status'=>'belum']);
         if(isset($resi)){
-          $id_resi = $resi->id_pesanan;
+          $id_pesanan = $resi->id_pesanan;
         } else {
-          $id_resi = 0;
+          $id_pesanan = 0;
         }
 
-        $data_resi = ['id_pesanan'=> $id_resi];
+        $data_resi = ['id_pesanan'=> $id_pesanan];
         $this->Pesanan_m->delete_by($data_resi);
 
-        $data_resi = ['id_resi'=> $id_resi];
+        $data_resi = ['id_pesanan'=> $id_pesanan];
         $this->Detail_pesanan_m->delete_by($data_resi);
 
         redirect('panel');

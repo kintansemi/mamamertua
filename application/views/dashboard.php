@@ -32,7 +32,7 @@
                                                     <input type="text" name="kode" class="form-control">
                                                 </div>
                                                 <div class="col-md-6">
-                                                    <label>Jumlah Pembelian</label>
+                                                    <label>Banyak Pembelian</label>
                                                     <input type="number" name="jumlah" class="form-control">
                                                 </div>
                                             </div>
@@ -49,7 +49,7 @@
                       <div class="col-md-6">
                       <div class="box">
                           <div class="box-header">
-                              <h3 class="box-title">Tagihan</h3>
+                              <h3 class="box-title">Pembayaran</h3>
                           </div><!-- /.box-header -->
                           <a href="<?= base_url('panel/cetak_resi')?>" target="_blank"><button class="btn btn-primary btn-sm btn-round" >Cetak</button></a>
                           <button class="btn btn-primary btn-sm btn-round" data-toggle="modal" data-target="#myModal"><i class="fa fa-plus"></i> Bayar</button>
@@ -63,7 +63,7 @@
                                       <th>Harga</th>
                                       <th>Aksi</th>
                                   </tr>
-                                  <?php $id_resi=0; $i = 1; $total = 0; ?>
+                                  <?php $id_pesanan=0; $i = 1; $total = 0; ?>
                                   <?php foreach ($list_pesanan as $pesanan): ?>
                                     <?php $menu= $this->Menu_m->get_row(['id_menu'=> $pesanan->id_menu]);?>
                                   <tr>
@@ -71,10 +71,10 @@
                                       <td><?= $menu->nama_menu ?></td>
                                       <td><?= $pesanan->jumlah ?></td>
                                       <td>Rp. <?= $menu->harga ?></td>
-                                      <td><a href ="<?= base_url('panel/deletepesanan/'.$pesanan->id_pesanan)?>">Hapus</a></td>
+                                      <td><a href ="<?= base_url('panel/deletepesanan/'.$pesanan->id_detailpesanan)?>">Hapus</a></td>
                                       
                                   </tr>
-                                  <?php $id_resi= $pesanan->id_resi; $i++; $total = $total + ($pesanan->jumlah*$menu->harga); ?>
+                                  <?php $id_pesanan= $pesanan->id_pesanan; $i++; $total = $total + ($pesanan->jumlah*$menu->harga); ?>
                                 <?php endforeach; ?>
                                   <tr>
                                       <td>Total Pembayaran</td>
@@ -181,7 +181,7 @@
                                 <input type="hidden" class="form-control" name="total" value="<?= $total ?>">
                             </div>
                             <div class="col-sm-10">
-                                <input type="hidden" class="form-control" name="resi" value="<?= $id_resi ?>">
+                                <input type="hidden" class="form-control" name="resi" value="<?= $id_pesanan ?>">
                             </div>
                         </div>
                       </div><!-- col-lg-12-->       
